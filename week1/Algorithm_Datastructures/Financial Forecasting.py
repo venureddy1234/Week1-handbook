@@ -41,3 +41,9 @@ def demo():
 
 if __name__ == "__main__":
     demo()
+
+//OUTPUT:
+
+1276.521753 0.00013899803161621094 1276.521753 1.0013580322265625e-05 1276.521753 4.76837158203125e-06 1276.521753 2.6226043701171875e-06
+O(n) time & stack for recursive; memo adds cache overhead; iterative/closed-form is O(n) time, O(1) space
+
