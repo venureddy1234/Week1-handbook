@@ -53,7 +53,14 @@ public class Main {
         pdfDoc.open();
 
         DocumentFactory excelFactory = new ExcelDocumentFactory();
+
         Document excelDoc = excelFactory.createDocument();
         excelDoc.open();
     }
 }
+
+//OUTPUT:
+Opening Word document...
+Opening PDF document...
+Opening Excel document...
+
