@@ -62,7 +62,18 @@ def demo():
     print(" - Linear search: O(n) average/worst, O(1) best")
     print(" - Binary search: O(log n) average/worst, O(1) best")
 
-    print("\n👉 Use binary search for large, sorted catalogs due to O(log n) performance.")
+    print("\n Use binary search for large, sorted catalogs due to O(log n) performance.")
 
 if __name__ == "__main__":
     demo()
+
+//OUTPUT:
+
+Linear search: found Product(id=50000, name='Product08432', category='Books') in 0.013274 sec
+Binary search: found Product(id=50000, name='Product08432', category='Books') in 0.000091 sec
+
+Complexity summary:
+ - Linear search: O(n) average/worst, O(1) best
+ - Binary search: O(log n) average/worst, O(1) best
+
+ Use binary search for large, sorted catalogs due to O(log n) performance.
