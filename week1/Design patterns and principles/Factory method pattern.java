@@ -57,3 +57,10 @@ public class Main {
         excelDoc.open();
     }
 }
+
+//OUTPUT:
+
+Opening Word document...
+Opening PDF document...
+Opening Excel document...
+
