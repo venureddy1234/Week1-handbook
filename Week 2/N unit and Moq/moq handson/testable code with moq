@@ -1,0 +1,86 @@
+// Required Namespaces
+using System;
+using System.Net;
+using System.Net.Mail;
+using Moq;
+using NUnit.Framework;
+
+namespace CustomerCommDemo
+{
+    // ------------------- Business Layer -------------------
+
+    public interface IMailSender
+    {
+        bool SendMail(string toAddress, string message);
+    }
+
+    public class MailSender : IMailSender
+    {
+        public bool SendMail(string toAddress, string message)
+        {
+            MailMessage mail = new MailMessage();
+            SmtpClient smtpServer = new SmtpClient("smtp.gmail.com");
+
+            mail.From = new MailAddress("your_email_address@gmail.com");
+            mail.To.Add(toAddress);
+            mail.Subject = "Test Mail";
+            mail.Body = message;
+
+            smtpServer.Port = 587;
+            smtpServer.Credentials = new NetworkCredential("username", "password");
+            smtpServer.EnableSsl = true;
+
+            smtpServer.Send(mail);
+
+            return true;
+        }
+    }
+
+    public class CustomerComm
+    {
+        private readonly IMailSender _mailSender;
+
+        public CustomerComm(IMailSender mailSender)
+        {
+            _mailSender = mailSender;
+        }
+
+        public bool SendMailToCustomer()
+        {
+            return _mailSender.SendMail("cust123@abc.com", "Some Message");
+        }
+    }
+
+    // ------------------- Test Layer -------------------
+
+    [TestFixture]
+    public class CustomerCommTests
+    {
+        private Mock<IMailSender> _mockMailSender;
+        private CustomerComm _customerComm;
+
+        [OneTimeSetUp]
+        public void Setup()
+        {
+            _mockMailSender = new Mock<IMailSender>();
+
+            // Setup the mock to always return true for any input
+            _mockMailSender
+                .Setup(m => m.SendMail(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(true);
+
+            _customerComm = new CustomerComm(_mockMailSender.Object);
+        }
+
+        [TestCase]
+        public void SendMailToCustomer_ShouldReturnTrue_WhenMailSentSuccessfully()
+        {
+            // Act
+            bool result = _customerComm.SendMailToCustomer();
+
+            // Assert
+            Assert.IsTrue(result);
+            _mockMailSender.Verify(m => m.SendMail(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+        }
+    }
+}

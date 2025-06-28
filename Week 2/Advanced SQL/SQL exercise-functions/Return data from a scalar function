@@ -1,0 +1,35 @@
+-- Drop table if it exists (for clean run)
+DROP TABLE IF EXISTS Employees;
+
+-- Step 1: Create Employees table
+CREATE TABLE Employees (
+    EmployeeID INT PRIMARY KEY IDENTITY(1,1),
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    DepartmentID INT,
+    Salary DECIMAL(10, 2), -- Monthly salary
+    JoinDate DATE
+);
+
+-- Step 2: Insert sample data
+INSERT INTO Employees (FirstName, LastName, DepartmentID, Salary, JoinDate) VALUES
+('Alice', 'Smith', 1, 5000.00, '2023-01-10'),  -- Monthly salary = 5000
+('Bob', 'Johnson', 2, 5500.00, '2023-02-12');
+
+-- Step 3: Create scalar function to calculate annual salary
+CREATE FUNCTION fn_CalculateAnnualSalary (@EmployeeID INT)
+RETURNS DECIMAL(12, 2)
+AS
+BEGIN
+    DECLARE @AnnualSalary DECIMAL(12, 2);
+
+    SELECT @AnnualSalary = Salary * 12
+    FROM Employees
+    WHERE EmployeeID = @EmployeeID;
+
+    RETURN @AnnualSalary;
+END;
+GO
+
+-- Step 4: Execute the function for EmployeeID = 1
+SELECT dbo.fn_CalculateAnnualSalary(1) AS AnnualSalary;

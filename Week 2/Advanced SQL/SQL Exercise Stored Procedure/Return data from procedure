@@ -1,0 +1,37 @@
+-- DROP TABLE if it already exists (for reusability)
+DROP TABLE IF EXISTS Employees;
+
+-- Step 1: Create Employees table
+CREATE TABLE Employees (
+    EmployeeID INT PRIMARY KEY IDENTITY(1,1),
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    DepartmentID INT,
+    Salary DECIMAL(10, 2),
+    JoinDate DATE
+);
+
+-- Step 2: Insert sample data
+INSERT INTO Employees (FirstName, LastName, DepartmentID, Salary, JoinDate) VALUES
+('Alice', 'Smith', 1, 50000.00, '2023-01-10'),
+('Bob', 'Johnson', 2, 55000.00, '2023-02-12'),
+('Charlie', 'Lee', 1, 52000.00, '2023-03-15'),
+('David', 'Brown', 2, 60000.00, '2023-04-20'),
+('Eve', 'Wilson', 3, 58000.00, '2023-05-05');
+
+-- Step 3: Create stored procedure to return employee count by department
+CREATE PROCEDURE sp_GetEmployeeCountByDepartment
+    @DepartmentID INT
+AS
+BEGIN
+    SELECT 
+        COUNT(*) AS TotalEmployees
+    FROM 
+        Employees
+    WHERE 
+        DepartmentID = @DepartmentID;
+END;
+GO
+
+-- Step 4: Execute the stored procedure (example: DepartmentID = 1)
+EXEC sp_GetEmployeeCountByDepartment @DepartmentID = 1;

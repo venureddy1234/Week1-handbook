@@ -1,0 +1,40 @@
+using NUnit.Framework;
+using CalcLibrary; // Make sure this matches your actual namespace
+
+namespace CalcLibrary.Tests
+{
+    [TestFixture]
+    public class CalculatorTests
+    {
+        private Calculator _calculator;
+
+        // This method runs before each test
+        [SetUp]
+        public void SetUp()
+        {
+            _calculator = new Calculator();
+        }
+
+        // This method runs after each test
+        [TearDown]
+        public void TearDown()
+        {
+            _calculator = null;
+        }
+
+        // Test case for Add method
+        [Test]
+        public void Add_TwoPositiveNumbers_ReturnsCorrectSum()
+        {
+            // Arrange
+            int a = 10;
+            int b = 15;
+
+            // Act
+            int result = _calculator.Add(a, b);
+
+            // Assert
+            Assert.AreEqual(25, result);
+        }
+    }
+}
