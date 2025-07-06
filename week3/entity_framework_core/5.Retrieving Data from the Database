@@ -1,0 +1,54 @@
+using RetailStoreLab2;
+using RetailStoreLab2.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task Main(string[] args)
+    {
+        using var context = new AppDbContext();
+
+        // ❌ Comment this block after first run
+        /*
+        var electronics = new Category { Name = "Electronics" };
+        var groceries = new Category { Name = "Groceries" };
+
+        await context.Categories.AddRangeAsync(electronics, groceries);
+
+        var product1 = new Product { Name = "Laptop", Price = 75000, Category = electronics };
+        var product2 = new Product { Name = "Rice Bag", Price = 1200, Category = groceries };
+
+        await context.Products.AddRangeAsync(product1, product2);
+
+        await context.SaveChangesAsync();
+
+        Console.WriteLine("Initial data inserted successfully.");
+        */
+
+        // ✅ Lab 5: Dashboard display
+
+        Console.WriteLine("\n📋 Product Dashboard");
+
+        // 1. Retrieve all products with categories
+        var products = await context.Products
+                                    .Include(p => p.Category)
+                                    .ToListAsync();
+
+        foreach (var p in products)
+            Console.WriteLine($"{p.Name} - ₹{p.Price} - Category: {p.Category?.Name}");
+
+        // 2. Find by ID
+        var product = await context.Products
+                                   .Include(p => p.Category)
+                                   .FirstOrDefaultAsync(p => p.Id == 1);
+
+        Console.WriteLine($"\n🔍 Found (ID = 1): {product?.Name} - Category: {product?.Category?.Name}");
+
+        // 3. First expensive product
+        var expensive = await context.Products
+                                     .Include(p => p.Category)
+                                     .FirstOrDefaultAsync(p => p.Price > 50000);
+
+        Console.WriteLine($"💰 Expensive Product: {expensive?.Name} - ₹{expensive?.Price}");
+    }
