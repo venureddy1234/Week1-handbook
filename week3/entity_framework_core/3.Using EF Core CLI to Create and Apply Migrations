@@ -1,0 +1,52 @@
+sing RetailStoreLab2;
+using RetailStoreLab2.Models;
+using Microsoft.EntityFrameworkCore;
+
+class Program
+{
+    static void Main()
+    {
+        using var context = new AppDbContext();
+
+        Console.WriteLine("----- EF Core CRUD Lab -----");
+
+        // 1. INSERT
+        if (!context.Categories.Any())
+        {
+            var electronics = new Category { Name = "Electronics" };
+            var phone = new Product { Name = "Smartphone", Price = 50000, Category = electronics };
+            var laptop = new Product { Name = "Laptop", Price = 80000, Category = electronics };
+
+            context.Categories.Add(electronics);
+            context.Products.AddRange(phone, laptop);
+            context.SaveChanges();
+            Console.WriteLine("📥 Inserted new category and products.");
+        }
+
+        // 2. READ
+        var allProducts = context.Products.Include(p => p.Category).ToList();
+        Console.WriteLine("\n📄 Products in DB:");
+        foreach (var product in allProducts)
+        {
+            Console.WriteLine($"- {product.Name} ({product.Category.Name}) - ₹{product.Price}");
+        }
+
+        // 3. UPDATE
+        var productToUpdate = context.Products.FirstOrDefault(p => p.Name == "Laptop");
+        if (productToUpdate != null)
+        {
+            productToUpdate.Price = 75000;
+            context.SaveChanges();
+            Console.WriteLine("\n✏️ Updated Laptop price to ₹75,000");
+        }
+
+        // 4. DELETE
+        var productToDelete = context.Products.FirstOrDefault(p => p.Name == "Smartphone");
+        if (productToDelete != null)
+        {
+            context.Products.Remove(productToDelete);
+            context.SaveChanges();
+            Console.WriteLine("❌ Deleted 'Smartphone' from DB.");
+        }
+    }
+}
