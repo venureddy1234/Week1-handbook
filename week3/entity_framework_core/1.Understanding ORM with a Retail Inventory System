@@ -1,0 +1,42 @@
+using Microsoft.EntityFrameworkCore;
+using RetailInventory;
+using RetailInventory.Models;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        using var context = new RetailDbContext();
+
+        // Check if data already exists
+        if (!context.Categories.Any())
+        {
+            // Create a sample category
+            var electronics = new Category { Name = "Electronics" };
+
+            // Create sample products
+            var laptop = new Product { Name = "Laptop", Price = 80000, Stock = 10, Category = electronics };
+            var phone = new Product { Name = "Smartphone", Price = 50000, Stock = 20, Category = electronics };
+
+            // Add them to the database
+            context.Categories.Add(electronics);
+            context.Products.AddRange(laptop, phone);
+
+            context.SaveChanges();
+
+            Console.WriteLine("Sample data inserted successfully!");
+        }
+        else
+        {
+            Console.WriteLine("Data already exists.");
+        }
+
+        // Display the data
+        Console.WriteLine("\nCurrent Products:");
+        var products = context.Products.Include(p => p.Category).ToList();
+        foreach (var product in products)
+        {
+            Console.WriteLine($"- {product.Name} ({product.Category.Name}) - ₹{product.Price} - Stock: {product.Stock}");
+        }
+    }
+}
