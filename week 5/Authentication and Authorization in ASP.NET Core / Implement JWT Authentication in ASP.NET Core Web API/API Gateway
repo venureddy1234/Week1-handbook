@@ -1,1 +1,163 @@
+using Ocelot.DependencyInjection; 
+using Ocelot.Middleware; 
+var builder = WebApplication.CreateBuilder(args); 
+builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true); 
+builder.Services.AddOcelot(builder.Configuration); 
+var app = builder.Build(); 
+await app.UseOcelot(); 
+app.Run(); 
+ 
+Authservice 
+Authcontroller.cs 
+ 
+using Microsoft.AspNetCore.Mvc; 
+using Microsoft.IdentityModel.Tokens; 
+using System.IdentityModel.Tokens.Jwt; 
+using System.Security.Claims; 
+using System.Text; 
+ 
+[ApiController] 
+[Route("api/[controller]")] 
+public class AuthController : ControllerBase 
+{ 
+    private readonly IConfiguration _config; 
+    public AuthController(IConfiguration config) 
+    { 
+        _config = config; 
+    } 
+ 
+    [HttpPost("login")] 
+    public IActionResult Login([FromBody] LoginModel user) 
+    { 
+        if (user.Username == "admin" && user.Password == "password") 
+        { 
+            var tokenString = GenerateJWTToken(user.Username); 
+            return Ok(new { Token = tokenString }); 
+        } 
+        return Unauthorized(); 
+    } 
+ 
+    private string GenerateJWTToken(string username) 
+    { 
+        var claims = new[] 
+        { 
+            new Claim(JwtRegisteredClaimNames.Sub, username), 
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) 
+        }; 
+ 
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"])); 
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256); 
+ 
+        var token = new JwtSecurityToken( 
+            issuer: _config["Jwt:Issuer"], 
+            audience: _config["Jwt:Audience"], 
+            claims: claims, 
+            expires: DateTime.Now.AddMinutes(60), 
+            signingCredentials: creds); 
+ 
+        return new JwtSecurityTokenHandler().WriteToken(token); 
+    } 
+} 
+ 
+public class LoginModel 
+{ 
+    public string Username { get; set; } 
+    public string Password { get; set; } 
+} 
+Program.cs 
+ 
+using Microsoft.AspNetCore.Authentication.JwtBearer; 
+using Microsoft.IdentityModel.Tokens; 
+using System.Text; 
+ 
+var builder = WebApplication.CreateBuilder(args); 
+ 
+builder.Services.AddControllers(); 
+builder.Services.AddAuthentication(options => 
+{ 
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; 
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; 
+}) 
+.AddJwtBearer(options => 
+{ 
+    options.TokenValidationParameters = new TokenValidationParameters 
+    { 
+        ValidateIssuer = true, 
+        ValidateAudience = true, 
+        ValidateLifetime = true, 
+        ValidateIssuerSigningKey = true, 
+        ValidIssuer = builder.Configuration["Jwt:Issuer"], 
+        ValidAudience = builder.Configuration["Jwt:Audience"], 
+        IssuerSigningKey = new 
+SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])) 
+    }; 
+}); 
+ 
+builder.Services.AddAuthorization(); 
+var app = builder.Build(); 
+ 
+app.UseAuthentication(); 
+app.UseAuthorization(); 
+app.MapControllers(); 
+app.Run(); 
+ 
+ProductService 
+Program.cs 
+ 
+using Microsoft.AspNetCore.Authentication.JwtBearer; 
+using Microsoft.IdentityModel.Tokens; 
+using System.Text; 
+ 
+var builder = WebApplication.CreateBuilder(args); 
+ 
+builder.Services.AddControllers(); 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme) 
+    .AddJwtBearer(options => 
+    { 
+        options.TokenValidationParameters = new TokenValidationParameters 
+        { 
+            ValidateIssuer = true, 
+            ValidateAudience = true, 
+            ValidateLifetime = true, 
+            ValidateIssuerSigningKey = true, 
+            ValidIssuer = builder.Configuration["Jwt:Issuer"], 
+            ValidAudience = builder.Configuration["Jwt:Audience"], 
+IssuerSigningKey = new 
+SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])) 
+}; 
+}); 
+builder.Services.AddAuthorization(); 
+var app = builder.Build(); 
+app.UseAuthentication(); 
+app.UseAuthorization(); 
+app.MapControllers(); 
+app.Run();
+
+///output
+The template "ASP.NET Core Web API" was created successfully.
+
+Processing post-creation actions...
+Restoring C:\Users\pabbi\Downloads\JWT_Microservices_Demo\ProductService\ProductService\ProductService.csproj:
+Restore succeeded.
+
+C:\Users\pabbi\Downloads\JWT_Microservices_Demo\ProductService>C:\Users\pabbi\Downloads\JWT_Microservices_Demo\ProductService\ProductService
+'C:\Users\pabbi\Downloads\JWT_Microservices_Demo\ProductService\ProductService' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\Users\pabbi\Downloads\JWT_Microservices_Demo\ProductService>cd C:\Users\pabbi\Downloads\JWT_Microservices_Demo\ProductService\ProductService
+
+C:\Users\pabbi\Downloads\JWT_Microservices_Demo\ProductService\ProductService>
+
+C:\Users\pabbi\Downloads\JWT_Microservices_Demo\ProductService\ProductService>dotnet run
+C:\Users\pabbi\Downloads\JWT_Microservices_Demo\ProductService\ProductService>dotnet run
+Using launch settings from C:\Users\pabbi\Downloads\JWT_Microservices_Demo\ProductService\ProductService\Properties\launchSettings.json...
+Building...
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5015
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Users\pabbi\Downloads\JWT_Microservices_Demo\ProductService\ProductService
 
