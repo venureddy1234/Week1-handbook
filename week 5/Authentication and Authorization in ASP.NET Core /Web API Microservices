@@ -105,3 +105,18 @@ Version="7.0.0" />
  
 </Project> 
 
+///output
+Microsoft Windows [Version 10.0.26100.4351]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\>curl -X POST http://localhost:5000/api/auth/login -H "Content-Type: application/json" -d "{\"username\":\"admin\",\"password\":\"password\"}"
+{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlzdWVfbmFtZSI6ImFkbWluIiwibmJpYXQiOjE3NTI5NDM5NzYsImV4cCI6MTc1Mjk0MDM3Mn0.guae0fkemmYP0y72jyqQ56TyfIQdJkTnKpGggDCjydE"}
+
+C:\>curl http://localhost:5000/api/sample/protected -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlzdWVfbmFtZSI6ImFkbWluIiwibmJpYXQiOjE3NTI5NDM5NzYsImV4cCI6MTc1Mjk0MDM3Mn0.guae0fkemmYP0y72jyqQ56TyfIQdJkTnKpGggDCjydE"
+This is a protected endpoint. Hello admin!
+
+C:\>curl http://localhost:5000/api/sample/public
+This is a public endpoint.
+
+C:\>
+
