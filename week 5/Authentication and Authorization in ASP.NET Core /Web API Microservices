@@ -1,1 +1,107 @@
+Program.cs 
+using Microsoft.AspNetCore.Authentication.JwtBearer; 
+using Microsoft.IdentityModel.Tokens; 
+using System.Text; 
+using Microsoft.AspNetCore.Authorization; 
+using Microsoft.AspNetCore.Mvc; 
+var builder = WebApplication.CreateBuilder(args); 
+builder.Services.AddControllers(); 
+var key = Encoding.ASCII.GetBytes("ThisIsASecretKeyForJwtTokenGenerationDontShare"); 
+builder.Services.AddAuthentication(options => 
+{ 
+}) 
+options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; 
+options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; 
+.AddJwtBearer(options => 
+{ 
+options.RequireHttpsMetadata = false; 
+options.SaveToken = true; 
+options.TokenValidationParameters = new TokenValidationParameters 
+{ 
+        ValidateIssuerSigningKey = true, 
+        IssuerSigningKey = new SymmetricSecurityKey(key), 
+        ValidateIssuer = false, 
+        ValidateAudience = false, 
+        ClockSkew = TimeSpan.Zero 
+    }; 
+}); 
+ 
+builder.Services.AddAuthorization(); 
+ 
+var app = builder.Build(); 
+ 
+app.UseAuthentication(); 
+app.UseAuthorization(); 
+ 
+app.MapControllers(); 
+ 
+app.Run(); 
+ 
+public record UserLogin(string Username, string Password); 
+ 
+[ApiController] 
+[Route("api/[controller]")] 
+public class AuthController : ControllerBase 
+{ 
+    private readonly byte[] _key; 
+ 
+    public AuthController(IConfiguration config) 
+    { 
+        _key = Encoding.ASCII.GetBytes("ThisIsASecretKeyForJwtTokenGenerationDontShare"); 
+    } 
+ 
+    [HttpPost("login")] 
+    public IActionResult Login([FromBody] UserLogin user) 
+    { 
+        if (user.Username == "admin" && user.Password == "password") 
+        { 
+            var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler(); 
+            var tokenDescriptor = new SecurityTokenDescriptor 
+            { 
+                Subject = new System.Security.Claims.ClaimsIdentity(new[] 
+                { 
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, 
+user.Username) 
+                }), 
+                Expires = DateTime.UtcNow.AddHours(1), 
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(_key), 
+SecurityAlgorithms.HmacSha256Signature) 
+            }; 
+            var token = tokenHandler.CreateToken(tokenDescriptor); 
+            var tokenString = tokenHandler.WriteToken(token); 
+ 
+            return Ok(new { Token = tokenString }); 
+        } 
+ 
+        return Unauthorized(); 
+    } 
+} 
+ 
+[ApiController] 
+[Route("api/[controller]")] 
+public class SampleController : ControllerBase 
+{ 
+    [HttpGet("public")] 
+    public IActionResult Public() => Ok("This is a public endpoint."); 
+ 
+    [HttpGet("protected")] 
+    [Authorize] 
+    public IActionResult Protected() => Ok($"This is a protected endpoint. Hello 
+{User.Identity.Name}!"); 
+} 
+Exercise1.csproj 
+<Project Sdk="Microsoft.NET.Sdk.Web"> 
+ 
+  <PropertyGroup> 
+    <TargetFramework>net9.0</TargetFramework> 
+    <Nullable>enable</Nullable> 
+    <ImplicitUsings>enable</ImplicitUsings> 
+  </PropertyGroup> 
+ 
+  <ItemGroup> 
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" 
+Version="7.0.0" /> 
+  </ItemGroup> 
+ 
+</Project> 
 
