@@ -1,0 +1,17 @@
+.container {
+  display: flex;
+  justify-content: space-around;
+  padding: 40px;
+  background-color: #ccc;
+}
+
+.column {
+  flex: 1;
+  margin: 0 20px;
+  padding: 20px;
+  border-left: 4px solid green;
+}
+
+.column:first-child {
+  border-left: none;
+}

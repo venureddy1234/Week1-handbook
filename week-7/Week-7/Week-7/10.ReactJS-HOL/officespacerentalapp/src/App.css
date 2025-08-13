@@ -1,0 +1,14 @@
+.textRed {
+  color: red;
+  font-weight: bold;
+}
+
+.textGreen {
+  color: green;
+  font-weight: bold;
+}
+
+img {
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
